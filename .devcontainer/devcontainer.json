@@ -1,0 +1,45 @@
+{
+  "name": "PwC Foundry Agents Workshop",
+  // NOTE: no "image" key on purpose. Codespaces built on the DEFAULT Linux
+  // image do not count the container against your 15 GB-month storage quota;
+  // a custom base image does. Features are free of that penalty.
+  "features": {
+    "ghcr.io/devcontainers/features/azure-cli:1": {},
+    "ghcr.io/devcontainers/features/python:1": { "version": "3.12" },
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {},
+    "ghcr.io/devcontainers/features/github-cli:1": {}
+  },
+  "postCreateCommand": "bash .devcontainer/setup.sh",
+  "hostRequirements": { "cpus": 4 },
+  "remoteEnv": {
+    "WS_TENANT_ID": "${localEnv:WS_TENANT_ID}",
+    "WS_SUBSCRIPTION_ID": "${localEnv:WS_SUBSCRIPTION_ID}",
+    "WS_TENANT_DOMAIN": "${localEnv:WS_TENANT_DOMAIN}",
+    "WS_FOUNDRY_ACCOUNT": "fdy-pwc-agents-hub",
+    "WS_RESOURCE_GROUP": "rg-pwc-agents-lab",
+    "WS_PROJECT_PREFIX": "proj-attendee",
+    "WS_CHAT_MODEL": "gpt-5.4-mini",
+    "AZURE_CORE_OUTPUT": "table"
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-windows-ai-studio.windows-ai-studio",
+        "ms-azuretools.vscode-azureresourcegroups",
+        "ms-azuretools.vscode-azurefunctions",
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "redhat.vscode-yaml",
+        "ms-vscode.azurecli",
+        "continue.continue"
+      ],
+      "settings": {
+        "python.defaultInterpreterPath": "/usr/local/bin/python",
+        "terminal.integrated.defaultProfile.linux": "bash",
+        "yaml.schemas": {
+          "https://raw.githubusercontent.com/Azure/azure-dev/main/schemas/v1.0/azure.yaml.json": "**/azure.yaml"
+        }
+      }
+    }
+  }
+}

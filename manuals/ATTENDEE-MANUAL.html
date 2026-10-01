@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>PwC AI-103 Foundry Workshop</title>
+  <style>
+    body { margin: 0; font-family: "Segoe UI", Arial, sans-serif; background: #f5f7fb; color: #172033; }
+    header { background: linear-gradient(135deg, #1f3a8a, #7c3aed); color: white; padding: 32px 44px; }
+    main { max-width: 1120px; margin: 0 auto; padding: 28px; }
+    section { background: white; border-radius: 16px; padding: 22px 26px; margin: 18px 0; box-shadow: 0 4px 18px rgba(15,23,42,.08); }
+    h1 { margin: 0; font-size: 34px; }
+    h2 { color: #1f3a8a; margin-top: 0; }
+    h3 { margin-bottom: 8px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+    .card { border: 1px solid #d8e0f0; border-radius: 12px; padding: 16px; background: #fbfdff; }
+    .warn { border-left: 6px solid #f59e0b; background: #fff7ed; }
+    .ok { border-left: 6px solid #10b981; background: #ecfdf5; }
+    code { background: #eef2ff; padding: 2px 6px; border-radius: 6px; }
+    pre { background: #111827; color: #e5e7eb; padding: 14px; border-radius: 10px; overflow-x: auto; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border-bottom: 1px solid #e5e7eb; padding: 10px; text-align: left; vertical-align: top; }
+    th { background: #eef2ff; }
+    a { color: #1d4ed8; font-weight: 600; }
+    li { margin: 6px 0; }
+  </style>
+</head>
+<body>
+<header>
+  <h1>PwC AI-103 Foundry Workshop Guide</h1>
+  <p>Use this page during the workshop. Keep it open in your VM browser.</p>
+</header>
+<main>
+  <section class="grid">
+    <div class="card">
+      <h2>Your details</h2>
+      <p>Replace <code>NN</code> with your attendee number.</p>
+      <table>
+        <tr><th>Item</th><th>Value</th></tr>
+        <tr><td>Azure sign-in</td><td><code>attendeeNN@MngEnvMCAP063772.onmicrosoft.com</code></td></tr>
+        <tr><td>Entra password</td><td><code>PwcAgents-2026-NN!</code></td></tr>
+        <tr><td>VM</td><td><code>labvm-NN</code></td></tr>
+        <tr><td>Foundry project</td><td><code>proj-attendee-NN</code></td></tr>
+        <tr><td>Windows fallback</td><td><code>labuser</code> / instructor-provided password</td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <h2>Lab links</h2>
+      <ol>
+        <li><a href="https://microsoftlearning.github.io/mslearn-ai-agents/">Day 1 - Develop generative AI solutions in Azure</a></li>
+        <li><a href="https://microsoftlearning.github.io/mslearn-ai-agents/">Day 2 - Develop AI Agents in Azure</a></li>
+        <li><a href="pwc-lab-05-foundry-lifecycle.html">PwC Lab 5 - Foundry lifecycle, traces, KQL, evaluations</a></li>
+      </ol>
+    </div>
+  </section>
+
+  <section>
+    <h2>Architecture: hub and spokes</h2>
+    <div class="grid">
+      <div class="card ok">
+        <h3>Shared Foundry hub</h3>
+        <p>The instructor manages one Foundry hub with the shared model deployments.</p>
+        <ul>
+          <li><code>gpt-5.4-mini</code></li>
+          <li><code>gpt-5.4-nano</code></li>
+          <li><code>model-router</code></li>
+          <li><code>text-embedding-3-small</code></li>
+        </ul>
+      </div>
+      <div class="card ok">
+        <h3>Your spoke project</h3>
+        <p>You build in your own project: <code>proj-attendee-NN</code>.</p>
+        <p>You can create, edit, test, and delete your own agents there.</p>
+      </div>
+      <div class="card warn">
+        <h3>Model rule</h3>
+        <p>Do not deploy models in your spoke. Use the shared hub models already available to your project.</p>
+        <p>If a page asks you to deploy a model, stop and ask the instructor.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Step 1 - Connect to your VM desktop</h2>
+    <ol>
+      <li>Open <a href="https://portal.azure.com">portal.azure.com</a>.</li>
+      <li>Sign in as <code>attendeeNN@MngEnvMCAP063772.onmicrosoft.com</code>.</li>
+      <li>Search for <b>Virtual machines</b>.</li>
+      <li>Open <code>labvm-NN</code>.</li>
+      <li>Select <b>Connect</b> then <b>Bastion</b>.</li>
+      <li>Use <b>Microsoft Entra ID</b> sign-in if shown.</li>
+      <li>If needed, use fallback Windows credentials: <code>labuser</code> and the instructor-provided VM password.</li>
+    </ol>
+  </section>
+
+  <section>
+    <h2>Step 2 - Open Foundry</h2>
+    <ol>
+      <li>Inside the VM, open Microsoft Edge.</li>
+      <li>Go to <a href="https://ai.azure.com">ai.azure.com</a>.</li>
+      <li>Sign in as <code>attendeeNN@MngEnvMCAP063772.onmicrosoft.com</code>.</li>
+      <li>Select <code>proj-attendee-NN</code>.</li>
+      <li>Confirm you are not in another attendee's project.</li>
+    </ol>
+  </section>
+
+  <section>
+    <h2>Step 3 - Sign in to Azure CLI</h2>
+    <pre>az login --use-device-code
+azd auth login --use-device-code --tenant-id 79915ee0-594c-4201-8653-6ad77a909f4d
+az account show --query user.name -o tsv
+$env:FOUNDRY_PROJECT_ENDPOINT</pre>
+    <p>The output should be your attendee account.</p>
+  </section>
+
+  <section>
+    <h2>Universal skip rules for AI-103</h2>
+    <table>
+      <tr><th>If the lab says...</th><th>You do...</th></tr>
+      <tr><td>Create a Foundry project/resource</td><td>Skip. Use <code>proj-attendee-NN</code>.</td></tr>
+      <tr><td>Deploy a model</td><td>Skip. Use the shared hub model already available.</td></tr>
+      <tr><td>Create a resource group</td><td>Skip unless the instructor explicitly says otherwise.</td></tr>
+      <tr><td>Delete a model/resource group</td><td>Skip. Never delete shared workshop resources.</td></tr>
+      <tr><td>Create AI Search or Storage</td><td>Use the instructor handout for shared Search/Storage.</td></tr>
+      <tr><td>Create Azure Bot Service or publish to Teams</td><td>Skip unless the instructor demonstrates it.</td></tr>
+    </table>
+  </section>
+
+  <section>
+    <h2>Day 1 and Day 2 exercise guidance</h2>
+    <div class="grid">
+      <div class="card">
+        <h3>Exercise 01</h3>
+        <p>Do: create/edit agents, File Search, Code Interpreter, playground.</p>
+        <p>Skip: project creation, model deployment, cleanup.</p>
+      </div>
+      <div class="card">
+        <h3>Exercise 02</h3>
+        <p>Do: custom function code and <code>.env</code> setup.</p>
+        <p>Use <code>MODEL_DEPLOYMENT_NAME=gpt-5.4-mini</code> and your project endpoint.</p>
+      </div>
+      <div class="card">
+        <h3>Exercise 03</h3>
+        <p>Do: Microsoft Learn MCP and local MCP tools.</p>
+        <p>Skip: model deployment and quota changes.</p>
+      </div>
+      <div class="card">
+        <h3>Exercise 04</h3>
+        <p>Do: Foundry IQ using shared Search/Storage.</p>
+        <p>Name your knowledge base <code>ks-contosoproducts-NN</code>.</p>
+      </div>
+      <div class="card">
+        <h3>Exercises 05a/05b</h3>
+        <p>Skip unless the instructor demonstrates them. Teams/Bot Service and Work IQ are not part of the locked-down student path.</p>
+      </div>
+      <div class="card">
+        <h3>Exercises 06-09</h3>
+        <p>Use the same rules: existing project, shared model, no cleanup of Azure resources.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Need help?</h2>
+    <ol>
+      <li>Your attendee number.</li>
+      <li>Your VM name.</li>
+      <li>Your Foundry project name.</li>
+      <li>The lab step.</li>
+      <li>The exact error message.</li>
+    </ol>
+  </section>
+</main>
+</body>
+</html>

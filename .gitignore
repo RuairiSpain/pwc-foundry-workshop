@@ -1,0 +1,7 @@
+.out/
+.azure/
+__pycache__/
+*.pyc
+.venv/
+.continue/config.json
+*.env

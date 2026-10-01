@@ -1,0 +1,67 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Azure/azure-dev/main/schemas/v1.0/azure.yaml.json
+# =============================================================================
+# AGENT 1 - "Hello World" PROMPT agent with two skills.
+# A prompt agent is defined by configuration, not code: model + instructions +
+# tools. Nothing is containerised. This is the cheapest, fastest agent shape.
+# Every default is written out explicitly so you can see what you are getting.
+# =============================================================================
+name: pwc-hello-prompt-agent
+
+requiredVersions:
+  azd: ">=1.27.1"
+  extensions:
+    azure.ai.agents: ">=1.0.0-beta.11"
+    azure.ai.projects: ">=1.0.0-beta.4"
+
+services:
+
+  ai-project:
+    host: azure.ai.project
+    # Point at YOUR spoke. azd ai agent init fills this in; we set it explicitly
+    # so nobody accidentally provisions a second project.
+    endpoint: "${FOUNDRY_PROJECT_ENDPOINT}"
+
+  # --- Skills -----------------------------------------------------------
+  # A skill is a reusable, versioned behavioural instruction that the agent can
+  # discover and apply. Keeping them out of the main prompt means you can change
+  # one behaviour without re-testing the whole system prompt.
+  skill-uk-english:
+    host: azure.ai.skill
+    uses: [ai-project]
+    name: uk-english-style
+    description: Write in British English, concise, no exclamation marks.
+    file: ./skills/uk-english-style.md
+
+  skill-cite-sources:
+    host: azure.ai.skill
+    uses: [ai-project]
+    name: cite-sources
+    description: Always name the source of any factual claim, or say it is unknown.
+    file: ./skills/cite-sources.md
+
+  hello-agent:
+    host: azure.ai.agent
+    kind: prompt                     # <-- prompt agent, not hosted
+    uses: [ai-project, skill-uk-english, skill-cite-sources]
+    name: pwc-hello-agent
+    description: Minimal prompt agent demonstrating skills and instructions.
+    # This references the shared hub deployment created by infra/20-create-foundry.sh.
+    model: "${WS_CHAT_MODEL}"
+    instructions: |
+      You are the PwC Agents Workshop greeter.
+      Introduce yourself in one sentence, then answer the user's question.
+      If you do not know something, say so plainly rather than guessing.
+    skills:
+      - uk-english-style
+      - cite-sources
+    protocols:
+      - protocol: responses
+        version: 2.0.0
+    # ---- Explicit defaults, so the class can see and change them ----
+    modelParameters:
+      temperature: 0.2               # default is 1.0; lower = more repeatable demos
+      topP: 0.95
+      maxOutputTokens: 800
+    observability:
+      tracing: true                  # ON from the first run - lab 5 depends on it
+      logLevel: information

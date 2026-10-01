@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>PwC Lab 5 - Foundry lifecycle</title>
+  <style>
+    body { margin: 0; font-family: "Segoe UI", Arial, sans-serif; background: #f8fafc; color: #172033; }
+    header { background: linear-gradient(135deg, #0f766e, #1d4ed8); color: white; padding: 30px 44px; }
+    main { max-width: 1080px; margin: auto; padding: 28px; }
+    section { background: white; border-radius: 14px; padding: 22px 26px; margin: 16px 0; box-shadow: 0 3px 14px rgba(15,23,42,.08); }
+    h1 { margin: 0; }
+    h2 { color: #0f766e; margin-top: 0; }
+    code { background: #ecfeff; padding: 2px 6px; border-radius: 6px; }
+    pre { background: #111827; color: #e5e7eb; padding: 14px; border-radius: 10px; overflow-x: auto; }
+    li { margin: 7px 0; }
+    .note { border-left: 6px solid #0ea5e9; background: #f0f9ff; }
+    .warn { border-left: 6px solid #f59e0b; background: #fff7ed; }
+    a { color: #1d4ed8; font-weight: 600; }
+  </style>
+</head>
+<body>
+<header>
+  <h1>PwC Lab 5 - Publish, test, trace, query, evaluate</h1>
+  <p>Extra Foundry lifecycle features for the PwC workshop.</p>
+</header>
+<main>
+  <section class="note">
+    <h2>Goal</h2>
+    <p>Use one of your deployed workshop agents to practise the full lifecycle: publish, call by API, inspect traces, query logs, and run evaluations.</p>
+    <p>Recommended agent: <code>pwc-knowledge-agent</code>.</p>
+  </section>
+
+  <section>
+    <h2>1. Confirm your project and agent</h2>
+    <pre>$env:FOUNDRY_PROJECT_ENDPOINT
+az account show --query user.name -o tsv
+azd ai agent list</pre>
+    <p>You should be signed in as <code>attendeeNN@MngEnvMCAP063772.onmicrosoft.com</code>.</p>
+  </section>
+
+  <section>
+    <h2>2. Confirm the pre-deployed agent</h2>
+    <ol>
+      <li>The instructor pre-deployed four sample agents into your project.</li>
+      <li>Use <code>pwc-knowledge-agent</code> for this lab.</li>
+      <li>If you edit instructions in the portal, save a new version before testing again.</li>
+    </ol>
+    <p>Publishing from source with <code>azd deploy</code> is instructor-led for this locked-down workshop.</p>
+  </section>
+
+  <section>
+    <h2>3. Call the agent with curl</h2>
+    <pre>$TOKEN = az account get-access-token --scope https://ai.azure.com/.default --query accessToken -o tsv
+$ENDPOINT = "$env:FOUNDRY_PROJECT_ENDPOINT/agents/pwc-knowledge-agent/responses"
+curl.exe -fsS $ENDPOINT `
+  -H "Authorization: Bearer $TOKEN" `
+  -H "Content-Type: application/json" `
+  -d '{"input":"What is the maximum hosted-agent idle timeout?","stream":false}'</pre>
+  </section>
+
+  <section>
+    <h2>4. Inspect traces in Foundry</h2>
+    <ol>
+      <li>Open <a href="https://ai.azure.com">ai.azure.com</a>.</li>
+      <li>Select <code>proj-attendee-NN</code>.</li>
+      <li>Open <b>Tracing</b>.</li>
+      <li>Find your curl request.</li>
+      <li>Review input/output tokens, tool calls, latency, model name, and correlation ID.</li>
+    </ol>
+  </section>
+
+  <section>
+    <h2>5. Query logs with KQL</h2>
+    <p>Open Log Analytics workspace <code>law-pwc-agents-lab</code>, then run discovery first:</p>
+    <pre>search *
+| where TimeGenerated > ago(1d)
+| summarize Rows=count() by $table
+| order by Rows desc</pre>
+    <p>Then query by your project:</p>
+    <pre>search *
+| where TimeGenerated > ago(1d)
+| where tostring(*) contains "proj-attendee-NN"
+| take 100</pre>
+  </section>
+
+  <section class="warn">
+    <h2>6. AI Gateway discussion</h2>
+    <p>This workshop explains gateway patterns, but gateway setup can vary by tenant and product rollout.</p>
+    <ol>
+      <li>Direct agent endpoint: simplest for a lab.</li>
+      <li>Gateway endpoint: useful for central policy, throttling, keys, and consumer-level reporting.</li>
+      <li>Ask the instructor before changing gateway or API Management settings.</li>
+    </ol>
+  </section>
+
+  <section>
+    <h2>7. Run an evaluation</h2>
+    <ol>
+      <li>In Foundry, open your project.</li>
+      <li>Open <b>Evaluations</b>.</li>
+      <li>Create an evaluation for your agent.</li>
+      <li>Use a small synthetic dataset or examples from your knowledge source.</li>
+      <li>Review groundedness, relevance, coherence, and individual failed rows.</li>
+    </ol>
+  </section>
+
+  <section>
+    <h2>8. Optimise and compare</h2>
+    <ol>
+      <li>Change a prompt or instruction.</li>
+      <li>Deploy a new version.</li>
+      <li>Run the same evaluation again.</li>
+      <li>Compare scores and failures before accepting the change.</li>
+    </ol>
+  </section>
+
+  <section>
+    <h2>Finish</h2>
+    <p>You have now used the extra Foundry lifecycle features that are not covered deeply in the standard AI-103 labs.</p>
+    <p><a href="pwc-workshop-guide.html">Back to main guide</a></p>
+  </section>
+</main>
+</body>
+</html>

@@ -1,0 +1,60 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Azure/azure-dev/main/schemas/v1.0/azure.yaml.json
+# =============================================================================
+# AGENT 3 - MAF multi-agent WORKFLOW behind model-router + two cheap models.
+# Teaches: workflows vs single agents, model routing, cost control.
+# Idle timeout 300s again, for the same teaching reason.
+# =============================================================================
+name: pwc-workflow-agent
+
+requiredVersions:
+  azd: ">=1.27.1"
+  extensions:
+    azure.ai.agents: ">=1.0.0-beta.11"
+    azure.ai.projects: ">=1.0.0-beta.4"
+
+services:
+
+  ai-project:
+    host: azure.ai.project
+    endpoint: "${FOUNDRY_PROJECT_ENDPOINT}"
+  learn-mcp:
+    host: azure.ai.connection
+    uses: [ai-project]
+    category: RemoteTool
+    target: https://learn.microsoft.com/api/mcp
+    authType: Anonymous
+
+  workflow-tools:
+    host: azure.ai.toolbox
+    uses: [ai-project, learn-mcp]
+    description: Learn MCP for the researcher role.
+    tools:
+      - type: mcp
+        connection: learn-mcp
+
+  workflow-agent:
+    host: azure.ai.agent
+    kind: hosted
+    project: src
+    language: docker
+    uses: [ai-project, learn-mcp, workflow-tools]
+    toolboxes: [workflow-tools]
+    name: pwc-workflow-agent
+    description: Researcher + analyst + writer workflow, exposed as one agent.
+    protocols:
+      - protocol: responses
+        version: 2.0.0
+    startupCommand: python main.py
+    sessionConfiguration:
+      idleTimeoutSeconds: 600        # longer: workflows take more turns
+    container:
+      resources:
+        cpu: "1.0"                   # 3 agents in one process
+        memory: 2.0Gi
+    env:
+      ROUTER_DEPLOYMENT_NAME: "${WS_ROUTER_MODEL}"
+      CHEAP_MODEL_A: "${WS_CHAT_MODEL}"
+      CHEAP_MODEL_B: "${WS_CHAT_MODEL_B}"
+      APPLICATIONINSIGHTS_CONNECTION_STRING: "${APPLICATIONINSIGHTS_CONNECTION_STRING}"
+      OTEL_SERVICE_NAME: pwc-workflow-agent
+      ENABLE_TRACING: "true"

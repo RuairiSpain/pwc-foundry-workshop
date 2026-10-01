@@ -1,0 +1,8 @@
+# Pinned to the versions verified against the September 2026 SDK line.
+# Re-check before the workshop: the hosting package is still prerelease.
+agent-framework>=1.0.0
+agent-framework-foundry>=1.0.0
+agent-framework-foundry-hosting>=1.0.0b1
+azure-ai-projects>=2.5.0
+azure-identity>=1.19.0
+azure-monitor-opentelemetry>=1.6.0
